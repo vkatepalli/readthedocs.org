@@ -853,6 +853,18 @@ class Project(models.Model):
         """
         return positive if self.has_feature(feature) else negative
 
+    @property
+    def show_advertising(self):
+        """
+        Whether this project is ad-free
+
+        :return: ``True`` if advertising should be shown and ``False`` otherwise
+        """
+        if self.ad_free or self.gold_owners.exists():
+            return False
+
+        return True
+
 
 class APIProject(Project):
 
@@ -886,11 +898,19 @@ class APIProject(Project):
                 pass
         super(APIProject, self).__init__(*args, **kwargs)
 
+        # Overwrite the database property with the value from the API
+        self.ad_free = (not kwargs.pop('show_advertising', True))
+
     def save(self, *args, **kwargs):
         return 0
 
     def has_feature(self, feature_id):
         return feature_id in self.features
+
+    @property
+    def show_advertising(self):
+        """Whether this project is ad-free (don't access the database)"""
+        return not self.ad_free
 
 
 @python_2_unicode_compatible
