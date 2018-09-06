@@ -40,16 +40,17 @@ class Command(BaseCommand):
             log.info('Adding indexing tasks to queue {0}'.format(queue_name))
             apply_async_kwargs['queue'] = queue_name
 
+        index_time = timezone.now()
+        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+
         for doc in registry.get_documents(models):
             queryset = doc().get_queryset()
             # Get latest object from the queryset
-            index_time = timezone.now()
 
             app_label = queryset.model._meta.app_label
             model_name = queryset.model.__name__
 
             index_name = doc._doc_type.index
-            timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
             new_index_name = "{}_{}".format(index_name, timestamp)
 
             pre_index_task = create_new_es_index.si(app_label=app_label,
