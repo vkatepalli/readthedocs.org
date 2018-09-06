@@ -70,15 +70,16 @@ class Command(BaseCommand):
             # Task to run in order to add the objects
             # that has been inserted into database while indexing_tasks was running
             # We pass the creation time of latest object, so its possible to index later items
-            missed_index_task = index_missing_objects.si(app_label=app_label,
-                                                         model_name=model_name,
-                                                         document_class=str(doc),
-                                                         index_generation_time=index_time)
+            # missed_index_task = index_missing_objects.si(app_label=app_label,
+            #                                              model_name=model_name,
+            #                                              document_class=str(doc),
+            #                                              index_generation_time=index_time)
 
             # http://celery.readthedocs.io/en/latest/userguide/canvas.html#chords
             chord_tasks = chord(header=indexing_tasks, body=post_index_task)
             # http://celery.readthedocs.io/en/latest/userguide/canvas.html#chain
-            chain(pre_index_task, chord_tasks, missed_index_task).apply_async(**apply_async_kwargs)
+            # chain(pre_index_task, chord_tasks, missed_index_task).apply_async(**apply_async_kwargs)
+            chain(pre_index_task, chord_tasks).apply_async(**apply_async_kwargs)
 
             message = ("Successfully issued tasks for {}.{}, total {} items"
                        .format(app_label, model_name, queryset.count()))
