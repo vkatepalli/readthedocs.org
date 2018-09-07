@@ -33,12 +33,11 @@ class Command(BaseCommand):
             }
             yield index_objects_to_es.si(**data)
 
-    def _run_reindex_tasks(self, models, host_queue):
+    def _run_reindex_tasks(self, models, queue):
         apply_async_kwargs = {'priority': 0}
-        if host_queue:
-            queue_name = socket.gethostname()
-            log.info('Adding indexing tasks to queue {0}'.format(queue_name))
-            apply_async_kwargs['queue'] = queue_name
+        if queue:
+            log.info('Adding indexing tasks to queue {0}'.format(queue))
+            apply_async_kwargs['queue'] = queue
 
         index_time = timezone.now()
         timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
@@ -77,8 +76,8 @@ class Command(BaseCommand):
 
             # http://celery.readthedocs.io/en/latest/userguide/canvas.html#chords
             chord_tasks = chord(header=indexing_tasks, body=post_index_task)
-            if host_queue:
-                chord_tasks.set(queue=queue_name)
+            if queue:
+                chord_tasks.set(queue=queue)
             # http://celery.readthedocs.io/en/latest/userguide/canvas.html#chain
             # chain(pre_index_task, chord_tasks, missed_index_task).apply_async(**apply_async_kwargs)
             chain(pre_index_task, chord_tasks).apply_async(**apply_async_kwargs)
@@ -89,11 +88,10 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--host-queue',
-            dest='host_queue',
-            action='store_true',
-            default=False,
-            help="Queue the celery tasks in the queue for the server hostname (eg. web01)"
+            '--queue',
+            dest='queue',
+            action='store',
+            help="Set the celery queue name for the task."
         )
         parser.add_argument(
             '--models',
@@ -116,4 +114,8 @@ class Command(BaseCommand):
         if options['models']:
             models = [apps.get_model(model_name) for model_name in options['models']]
 
-        self._run_reindex_tasks(models=models, host_queue=options['host_queue'])
+        queue = None
+        if options.get('queue'):
+            queue = options['queue']
+
+        self._run_reindex_tasks(models=models, queue=queue)
