@@ -1,0 +1,1 @@
+mkdir ~/logs && touch ~/logs/doc-web.log ~/logs/nginx-access.log ~/logs/nginx-error.log ~/logs/doc-worker.log
