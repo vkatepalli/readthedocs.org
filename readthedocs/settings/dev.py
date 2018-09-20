@@ -9,7 +9,7 @@ class CommunityDevSettings(CommunityBaseSettings):
 
     """Settings for local development"""
 
-    PRODUCTION_DOMAIN = 'localhost:8000'
+    PRODUCTION_DOMAIN = '18.233.156.89'
     WEBSOCKET_HOST = 'localhost:8088'
 
     @property
@@ -29,8 +29,8 @@ class CommunityDevSettings(CommunityBaseSettings):
 
     SLUMBER_USERNAME = 'test'
     SLUMBER_PASSWORD = 'test'  # noqa: ignore dodgy check
-    SLUMBER_API_HOST = 'http://127.0.0.1:8000'
-    PUBLIC_API_URL = 'http://127.0.0.1:8000'
+    SLUMBER_API_HOST = 'http://18.233.156.89'
+    PUBLIC_API_URL = 'http://18.233.156.89'
 
     BROKER_URL = 'redis://localhost:6379/0'
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
